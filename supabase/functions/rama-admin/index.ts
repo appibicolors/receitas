@@ -1,10 +1,10 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.117.3';
 import { validWebp } from './rules.ts';
 const url = Deno.env.get('SUPABASE_URL')!,
   key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-const origin = Deno.env.get('RAMA_APP_ORIGIN')!;
-const redirect = Deno.env.get('RAMA_INVITE_REDIRECT')!;
+const origin = Deno.env.get('RAMA_APP_ORIGIN') ?? 'https://appibicolors.github.io';
+const redirect = Deno.env.get('RAMA_INVITE_REDIRECT') ?? 'https://appibicolors.github.io/receitas/convite.html';
 const headers = {
   'Access-Control-Allow-Origin': origin,
   'Access-Control-Allow-Headers': 'authorization,apikey,content-type,x-client-info',

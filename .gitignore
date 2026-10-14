@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env*
 !.env.example
+!.env.production
 backups/
 test-results/
 playwright-report/
