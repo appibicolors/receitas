@@ -14,8 +14,9 @@
 
 Aplicar os arquivos em ordem, cada um dentro de sua transação, pelo SQL Editor (mais simples no projeto compartilhado). Registrar arquivo, hash SHA256, responsável, horário e resultado no controle administrativo de migrations. Alternativa CLI: vincular o projeto explicitamente e revisar `supabase db push --dry-run` com todo o histórico remoto reconciliado antes de qualquer push. Não usar `db reset`, `--include-all` ou manipular migrations do aplicativo anterior.
 
-1. `202610140001_rama.sql`: sequência, três tabelas, índices, funções, triggers e RLS.
-2. `202610140002_rama_storage.sql`: bucket privado e política exclusiva de leitura.
+1. `20261014162739_rama_receitas_core.sql`: sequência, três tabelas, índices, funções, triggers e RLS.
+2. `20261014162756_rama_storage_privado.sql`: bucket privado e política exclusiva de leitura.
+3. `20261014163321_rama_pgtrgm_schema.sql`: relocação da extensão pg_trgm criada pela RAMA para o schema `extensions`, confirmado ausente antes da implantação. Não aplicar essa terceira migration para realocar extensões preexistentes de outro projeto sem revisão.
 
 Não há seed com usuários, e-mails ou senhas de produção. Não conceder `service_role` a navegadores. Após aplicar, repetir inspeção e comparar objetos anteriores: somente novos objetos RAMA, pg_trgm se faltava e bucket/política exclusivos são esperados.
 

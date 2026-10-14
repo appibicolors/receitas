@@ -1,6 +1,6 @@
 # Verificação e homologação
 
-Data: 14/10/2026, horário de Brasília. **Ambiente real não conectado.** Nenhuma migration, função ou bucket foi aplicado no Supabase em produção. Nenhum usuário real foi criado/alterado.
+Data: 14/10/2026, horário de Brasília. Migrations RAMA, bucket e Edge Function implantados após inspeção/autorização. Foram comparados 56 objetos antigos sem diferenças e executados testes reais de rejeição anônima. Nenhum usuário Auth real foi criado/alterado. Ver [estado da implantação](STATUS_IMPLANTACAO.md) para resultados recentes e limites da homologação.
 
 ## Escopo dos testes locais
 

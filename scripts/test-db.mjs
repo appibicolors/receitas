@@ -34,6 +34,7 @@ async function denied(sql, args = []) {
 }
 try {
   await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;
+ create schema extensions;
  create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
  grant usage on schema auth,public,storage to authenticated;grant execute on function auth.uid() to authenticated;
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
@@ -42,13 +43,19 @@ try {
  insert into auth.users values('${supervisor}'),('${operator}'),('${outsider}');`);
   await db.exec(
     await readFile(
-      new URL('../supabase/migrations/202610140001_rama.sql', import.meta.url),
+      new URL('../supabase/migrations/20261014162739_rama_receitas_core.sql', import.meta.url),
       'utf8',
     ),
   );
   await db.exec(
     await readFile(
-      new URL('../supabase/migrations/202610140002_rama_storage.sql', import.meta.url),
+      new URL('../supabase/migrations/20261014162756_rama_storage_privado.sql', import.meta.url),
+      'utf8',
+    ),
+  );
+  await db.exec(
+    await readFile(
+      new URL('../supabase/migrations/20261014163321_rama_pgtrgm_schema.sql', import.meta.url),
       'utf8',
     ),
   );
