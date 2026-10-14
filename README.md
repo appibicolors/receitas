@@ -4,7 +4,7 @@ Aplicação React/TypeScript/Vite/Tailwind para consulta industrial e administra
 
 ## Estado da entrega
 
-Código implementado e verificações descritas em [docs/VALIDACAO.md](docs/VALIDACAO.md). As migrations RAMA e a Edge Function foram implantadas no projeto `apontamento-producao` após inspeção/autorização. Os 56 objetos preexistentes inspecionados mantiveram as mesmas definições/permissões. O código foi enviado a `main` e o primeiro workflow passou. Consulte o [estado da implantação](docs/STATUS_IMPLANTACAO.md) para publicação e pendências de login/homologação. A vinculação do primeiro supervisor ainda depende de conta Auth válida.
+Publicado em [Receitas da RAMA](https://appibicolors.github.io/receitas/). Migrations RAMA e Edge Function implantadas após inspeção/autorização; primeiro supervisor vinculado a conta Auth existente confirmada pelo usuário. Os 56 objetos preexistentes inspecionados mantiveram as mesmas definições/permissões, assim como os metadados Auth e o perfil do apontamento dessa conta. Workflow aprovado e acesso público/rota hash verificados. Consulte [estado da implantação](docs/STATUS_IMPLANTACAO.md) para os limites da homologação e pendências de convites, fotos e backup.
 
 ## Executar
 
