@@ -1,0 +1,4 @@
+project_id = "receitas-rama-local"
+[functions.rama-admin]
+verify_jwt = false
+# getUser(token) valida explicitamente a sessão, inclusive chaves JWT assimétricas.
