@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 :root {
   font-family: Inter, Arial, sans-serif;
-  color: #243b40;
-  background: #f3f6f5;
+  color: #24364d;
+  background: #f3f6fb;
   font-synthesis: none;
 }
 * {
@@ -25,10 +25,10 @@ button,
   gap: 8px;
   min-height: 44px;
   padding: 10px 16px;
-  border: 1px solid #cdd9d7;
+  border: 1px solid #ccd8e7;
   border-radius: 8px;
   background: white;
-  color: #274b50;
+  color: #234a7b;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -36,19 +36,19 @@ button,
 }
 button:hover,
 .button:hover {
-  background: #e9f1ef;
+  background: #e9f0fa;
 }
 button:disabled {
   cursor: wait;
   opacity: 0.5;
 }
 .primary {
-  background: #175960;
+  background: #073579;
   color: white;
-  border-color: #175960;
+  border-color: #073579;
 }
 .primary:hover {
-  background: #103e43;
+  background: #05295e;
 }
 .danger {
   color: #a33333;
@@ -63,7 +63,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #3e9fb0;
+  outline: 3px solid #4c8edb;
   outline-offset: 3px;
 }
 h1,
@@ -83,11 +83,11 @@ h2 {
 }
 p {
   line-height: 1.65;
-  color: #597076;
+  color: #526780;
 }
 small {
   font-size: 12px;
-  color: #657c80;
+  color: #60738b;
 }
 label {
   display: flex;
@@ -99,11 +99,11 @@ label {
 input,
 select,
 textarea {
-  border: 1px solid #cbd7d5;
+  border: 1px solid #ccd7e7;
   border-radius: 7px;
   padding: 12px;
   background: white;
-  color: #243b40;
+  color: #24364d;
   min-height: 46px;
   width: 100%;
   font-weight: 400;
@@ -128,7 +128,7 @@ form .primary {
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 1.8px;
-  color: #487c7a;
+  color: #32649e;
   display: block;
   margin-bottom: 10px;
 }
@@ -146,14 +146,23 @@ form .primary {
   letter-spacing: 1.3px;
   margin-top: 3px;
 }
+.brand-logo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background: white;
+  border-radius: 8px;
+  padding: 3px;
+}
 .app header {
   background: white;
-  border-bottom: 1px solid #e0e8e6;
+  border-bottom: 1px solid #dfe7f1;
   padding: 22px max(24px, calc((100vw - 1240px) / 2));
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #164950;
+  color: #073579;
   gap: 20px;
 }
 .account {
@@ -174,7 +183,7 @@ form .primary {
   overflow-x: auto;
   background: white;
   padding: 0 max(24px, calc((100vw - 1240px) / 2));
-  border-bottom: 1px solid #dce5e3;
+  border-bottom: 1px solid #dce5f0;
 }
 .app nav a {
   display: flex;
@@ -187,9 +196,9 @@ form .primary {
   border-bottom: 3px solid transparent;
 }
 .app nav a.active {
-  color: #14565d;
-  border-color: #14565d;
-  background: #f1f7f5;
+  color: #073579;
+  border-color: #073579;
+  background: #edf3fc;
 }
 .content {
   max-width: 1240px;
@@ -201,11 +210,11 @@ footer {
   max-width: 1192px;
   margin: auto;
   padding: 20px 0;
-  border-top: 1px solid #d9e3e0;
+  border-top: 1px solid #d9e3f0;
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  color: #748987;
+  color: #71849b;
   letter-spacing: 1px;
 }
 .page-heading {
@@ -220,11 +229,11 @@ footer {
 }
 .panel {
   background: white;
-  border: 1px solid #dee7e4;
+  border: 1px solid #dfe7f2;
   border-radius: 12px;
   padding: 26px;
   margin-bottom: 22px;
-  box-shadow: 0 3px 10px #143f3c03;
+  box-shadow: 0 3px 10px #07357903;
 }
 .panel h2 {
   margin-bottom: 22px;
@@ -234,7 +243,7 @@ footer {
 }
 .search-label {
   font-size: 13px;
-  color: #3c575b;
+  color: #3c5373;
   margin-bottom: 12px;
 }
 .search-input {
@@ -242,10 +251,10 @@ footer {
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  border: 1px solid #b6cbc6;
+  border: 1px solid #b7c9e4;
   border-radius: 9px;
-  background: #fafcfb;
-  color: #477273;
+  background: #fafcff;
+  color: #416a9e;
 }
 .search-input input {
   font-size: 18px;
@@ -274,7 +283,7 @@ footer {
 }
 .result {
   background: white;
-  border: 1px solid #dde7e3;
+  border: 1px solid #dde6f2;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -285,7 +294,7 @@ footer {
   padding: 18px;
 }
 .recipe-link:hover {
-  background: #f8fbfa;
+  background: #f7faff;
 }
 .recipe-link > div:nth-child(2) {
   flex: 1;
@@ -298,7 +307,7 @@ footer {
 }
 .recipe-code {
   display: block;
-  color: #3e7c7c;
+  color: #245c9f;
   font-size: 12px;
   font-weight: 750;
   letter-spacing: 1.2px;
@@ -308,7 +317,7 @@ footer {
   width: 72px;
   height: 72px;
   border-radius: 8px;
-  background: #edf2ef;
+  background: #edf2f9;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -324,7 +333,7 @@ footer {
   justify-content: center;
   flex-direction: column;
   gap: 16px;
-  color: #7c9993;
+  color: #7793b6;
   font-size: 13px;
 }
 .photo.large {
@@ -332,7 +341,7 @@ footer {
   height: 100%;
   min-height: 300px;
   max-height: 440px;
-  border: 1px solid #d9e4df;
+  border: 1px solid #d9e4f2;
   border-radius: 12px;
 }
 .badge {
@@ -394,7 +403,7 @@ footer {
 .empty {
   padding: 55px;
   text-align: center;
-  color: #79928c;
+  color: #7087a6;
 }
 .empty svg {
   margin: 0 auto 15px;
@@ -423,7 +432,7 @@ footer {
   gap: 8px;
   font-size: 12px;
   font-weight: 650;
-  color: #3f706f;
+  color: #285e9e;
   margin-bottom: 24px;
 }
 .detail-grid {
@@ -437,12 +446,12 @@ footer {
   gap: 20px;
 }
 .parameters > div {
-  border-bottom: 1px solid #e1eae6;
+  border-bottom: 1px solid #e1e9f3;
   padding: 12px 0 18px;
 }
 .parameters span {
   display: block;
-  color: #6b807e;
+  color: #627690;
   font-size: 13px;
   margin-bottom: 8px;
 }
@@ -450,7 +459,7 @@ footer {
   font-size: 36px;
   font-weight: 700;
   line-height: 1.25;
-  color: #173e43;
+  color: #073579;
 }
 .parameters strong small {
   font-size: 16px;
@@ -470,7 +479,7 @@ footer {
 .observations p {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  color: #334c50;
+  color: #304967;
 }
 .detail-footer {
   display: flex;
@@ -490,11 +499,11 @@ footer {
 }
 .stats span {
   font-size: 13px;
-  color: #6b807e;
+  color: #627690;
 }
 .stats strong {
   font-size: 38px;
-  color: #1b4d51;
+  color: #073579;
 }
 .stats small {
   display: flex;
@@ -519,7 +528,7 @@ footer {
 }
 .unit-input {
   display: flex;
-  border: 1px solid #cbd7d5;
+  border: 1px solid #ccd7e7;
   border-radius: 7px;
   overflow: hidden;
 }
@@ -532,8 +541,8 @@ footer {
   display: flex;
   align-items: center;
   padding: 0 14px;
-  background: #f3f7f5;
-  color: #6a807b;
+  background: #f2f6fc;
+  color: #617796;
   font-weight: 400;
   white-space: nowrap;
 }
@@ -572,14 +581,14 @@ table {
 }
 th {
   text-align: left;
-  color: #748780;
+  color: #6c7e96;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 12px;
 }
 td {
-  border-top: 1px solid #e5ece8;
+  border-top: 1px solid #e5ecf5;
   padding: 18px 12px;
 }
 td small {
@@ -608,7 +617,7 @@ td small {
   display: grid;
   gap: 8px;
   padding: 14px;
-  background: #f5f8f6;
+  background: #f4f7fc;
   border-radius: 6px;
   font-size: 12px;
   white-space: pre-wrap;
@@ -620,28 +629,28 @@ td small {
   grid-template-columns: 1fr 1fr;
 }
 .login-aside {
-  background: #123f45;
+  background: #073579;
   color: white;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 60px 10%;
   min-height: 650px;
-  background-image: linear-gradient(145deg, #123f45, #1d6366);
+  background-image: linear-gradient(145deg, #073579, #1659a4);
 }
 .login-aside .brand small,
 .login-aside > small {
-  color: #b0cbc5;
+  color: #bdd1ed;
 }
 .login-aside .eyebrow {
-  color: #95c5b8;
+  color: #b2d1f5;
 }
 .login-aside h1 {
   font-size: 48px;
   line-height: 1.18;
 }
 .login-aside p {
-  color: #bcd6d0;
+  color: #ccddf4;
   margin-top: 26px;
   font-size: 16px;
 }
@@ -727,8 +736,9 @@ td small {
   .brand small {
     font-size: 7px;
   }
-  .brand svg {
-    width: 24px;
+  .brand-logo {
+    width: 44px;
+    height: 44px;
   }
   .account {
     gap: 10px;

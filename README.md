@@ -1,6 +1,6 @@
-# IBICOLOR · Receitas da RAMA
+# IBICOLORS · Receitas da RAMA
 
-Aplicação React/TypeScript/Vite/Tailwind para consulta industrial e administração de receitas. Identidade textual provisória, sem reprodução de logotipo oficial. PostgreSQL/Supabase é a fonte dos dados. HashRouter e base `/receitas/` são compatíveis com GitHub Pages.
+Aplicação React/TypeScript/Vite/Tailwind para consulta industrial e administração de receitas. Identidade visual azul com o logo fornecido pela empresa, preservado em `src/assets/ibicolor-logo.png`. PostgreSQL/Supabase é a fonte dos dados. HashRouter e base `/receitas/` são compatíveis com GitHub Pages.
 
 ## Estado da entrega
 

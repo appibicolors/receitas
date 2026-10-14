@@ -1,27 +1,25 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, NavLink, Route, Routes, Outlet, useNavigate } from 'react-router-dom';
-import {
-  Factory,
-  Search,
-  Plus,
-  LayoutDashboard,
-  Users,
-  LogOut,
-  History,
-  ClipboardList,
-} from 'lucide-react';
+import { Search, Plus, LayoutDashboard, Users, LogOut, History, ClipboardList } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth';
 import { supabase, configured, fail } from './lib/client';
 import { Alert, Spinner } from './components';
 import { SearchPage, Detail, Dashboard, HistoryPage } from './pages/Recipes';
 import Editor from './pages/Editor';
 import UsersPage from './pages/Users';
+import companyLogo from './assets/ibicolor-logo.png';
 function Brand() {
   return (
     <div className="brand">
-      <Factory size={30} />
+      <img
+        className="brand-logo"
+        src={companyLogo}
+        alt="Logo da IBICOLORS"
+        width={56}
+        height={56}
+      />
       <div>
-        IBICOLOR<small>ACABAMENTO TÊXTIL · RAMA</small>
+        IBICOLORS<small>ACABAMENTO TÊXTIL · RAMA</small>
       </div>
     </div>
   );
@@ -65,7 +63,7 @@ function Login() {
             Informação certa para a operação.
           </p>
         </div>
-        <small>IBICOLOR · SISTEMA DE RECEITAS DA RAMA</small>
+        <small>IBICOLORS · SISTEMA DE RECEITAS DA RAMA</small>
       </section>
       <section className="login-form">
         <span className="eyebrow">ACESSO INDIVIDUAL</span>
@@ -106,7 +104,7 @@ function Login() {
             Sair desta conta
           </button>
         )}
-        <small>Acesso destinado à equipe autorizada da Ibicolor.</small>
+        <small>Acesso destinado à equipe autorizada da IBICOLORS.</small>
       </section>
     </main>
   );
@@ -209,7 +207,7 @@ function Layout() {
         <Outlet />
       </main>
       <footer>
-        IBICOLOR · RAMA <span>Horários de Brasília</span>
+        IBICOLORS · RAMA <span>Horários de Brasília</span>
       </footer>
     </div>
   );

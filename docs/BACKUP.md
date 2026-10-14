@@ -17,7 +17,7 @@ select last_value,is_called from public.rama_receitas_historico_id_seq;
 Guardar resultado em `sequencias.json` junto ao backup; não inferir sequência apenas do maior código, porque operações canceladas deixam lacunas. Incluir os dois arquivos SQL da migration, versão do código e configuração não secreta. Nunca copiar secrets para o pacote.
 
 5. Para backup transacional adicional, usar `pg_dump` com conexão segura/arquivo de serviço fora do repositório, selecionando **somente** `public.rama_usuarios`, `public.rama_receitas`, `public.rama_receitas_historico`, `public.rama_receitas_codigo_seq`, `public.rama_receitas_historico_id_seq`. Executar em snapshot consistente. Não executar dump indiscriminado do Auth/apontamento para esta finalidade. Storage é exportado separadamente. `pg_dump` pode emitir aviso sobre FK para Auth fora da seleção; preservar o mapeamento autorizado descrito abaixo.
-6. Conferir hashes, contagens, abertura de amostras WebP e arquivos de sequências. Comprimir e criptografar o pacote com ferramenta corporativa, mantendo senha/chave fora do Drive. Fazer upload manual ao Google Drive administrativo da Ibicolor em pasta restrita. Confirmar upload baixando uma cópia e verificando SHA256. Não publicar links de compartilhamento aberto.
+6. Conferir hashes, contagens, abertura de amostras WebP e arquivos de sequências. Comprimir e criptografar o pacote com ferramenta corporativa, mantendo senha/chave fora do Drive. Fazer upload manual ao Google Drive administrativo da IBICOLORS em pasta restrita. Confirmar upload baixando uma cópia e verificando SHA256. Não publicar links de compartilhamento aberto.
 7. Definir retenção conforme política administrativa e espaço disponível (ex.: diários 7 dias, semanais 4 semanas, mensais 6 meses após aprovação). Nenhuma rotina é executada a cada consulta.
 
 ## Restauração obrigatória em ambiente isolado
@@ -37,4 +37,4 @@ Falhas de gravação tentam recolher uploads novos não referenciados. Substitui
 
 ## Integração Drive futura
 
-Se autorizada, usar serviço administrativo com OAuth da conta Ibicolor ou service account autorizada para uma pasta específica. Tokens em cofre/secret de backend, nunca frontend/Actions público. Programar exportação na janela acordada, compactar, criptografar, enviar, verificar hashes, registrar falhas e testar restauração periodicamente. Confirmar cotas/SMTP e custos antes de automatizar. Nenhuma credencial foi criada ou presumida aqui.
+Se autorizada, usar serviço administrativo com OAuth da conta IBICOLORS ou service account autorizada para uma pasta específica. Tokens em cofre/secret de backend, nunca frontend/Actions público. Programar exportação na janela acordada, compactar, criptografar, enviar, verificar hashes, registrar falhas e testar restauração periodicamente. Confirmar cotas/SMTP e custos antes de automatizar. Nenhuma credencial foi criada ou presumida aqui.
