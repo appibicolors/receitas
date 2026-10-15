@@ -941,3 +941,27 @@ td small {
     animation: none;
   }
 }
+
+.condition-choice {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  font-weight: 700;
+  color: var(--primary);
+}
+.condition-choice input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin: 0;
+  accent-color: #073574;
+}
+.parameters strong.not-applicable {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.bath-condition {
+  font-weight: 700;
+}

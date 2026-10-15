@@ -16,9 +16,9 @@ const draft = {
   alimentacao: 12,
   pressao_fourlad: 4.5,
   banho_itens: [
-    { quantidade: 40, produto: 'Silicone' },
-    { quantidade: 5, produto: 'Graxo' },
-    { quantidade: 50, produto: 'Talco baby' },
+    { quantidade: 40, produto: 'SILICONE' },
+    { quantidade: 5, produto: 'GRAXO' },
+    { quantidade: 50, produto: 'TALCO BABY' },
   ],
   largura: 1.5,
   observacao: 'Linha 1\nLinha 2',
@@ -119,14 +119,35 @@ try {
     assert.equal(saved.alimentacao, 12);
     assert.deepEqual(saved.banho_itens, draft.banho_itens);
   });
+  await db.exec('reset role');
+  const snapshot = async () =>
+    (
+      await db.query(
+        'select (select jsonb_agg(r order by id) from rama_receitas r) as receitas,(select jsonb_agg(h order by id) from rama_receitas_historico h) as historico,(select last_value from rama_receitas_codigo_seq) as sequencia',
+      )
+    ).rows[0];
+  const beforeMigration = await snapshot();
+  await db.exec(
+    await readFile(
+      new URL(
+        '../supabase/migrations/20261015145516_rama_opcoes_na_caixa_alta.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  );
+  await ok('Nova migration preserva receitas existentes, histórico e sequência', async () =>
+    assert.deepEqual(await snapshot(), beforeMigration),
+  );
+  await role(supervisor);
   await ok('Temperatura decimal bloqueada no backend', () =>
     denied('select rama_salvar($1,$2,null)', [
       '10000000-0000-0000-0000-000000000002',
       { ...draft, temperatura: 180.5 },
     ]),
   );
-  await ok('Pressão Fourlad rejeita ausência, negativos e infinito', async () => {
-    for (const pressao_fourlad of [null, -1, 'Infinity', 'NaN'])
+  await ok('Pressão Fourlad rejeita negativos e infinito', async () => {
+    for (const pressao_fourlad of [-1, 'Infinity', 'NaN'])
       await denied('select rama_salvar($1,$2,null)', [
         '30000000-0000-0000-0000-000000000003',
         { ...draft, pressao_fourlad },
@@ -139,15 +160,14 @@ try {
         { ...draft, alimentacao },
       ]);
   });
-  await ok('Banho exige lista com quantidade numérica e produto preenchido', async () => {
+  await ok('Itens de banho exigem quantidade numérica e produto preenchido', async () => {
     for (const banho_itens of [
       null,
-      [],
       {},
       [null],
       [{ quantidade: 1, produto: ' ' }],
-      [{ quantidade: '40', produto: 'Silicone' }],
-      [{ quantidade: -1, produto: 'Graxo' }],
+      [{ quantidade: '40', produto: 'SILICONE' }],
+      [{ quantidade: -1, produto: 'GRAXO' }],
     ])
       await denied('select rama_salvar($1,$2,null)', [
         '30000000-0000-0000-0000-000000000003',
@@ -167,7 +187,7 @@ try {
     ]);
     await denied('select rama_salvar($1,$2,null)', [
       '10000000-0000-0000-0000-000000000002',
-      { ...draft, banho_itens: [{ quantidade: -1, produto: 'Silicone' }] },
+      { ...draft, banho_itens: [{ quantidade: -1, produto: 'SILICONE' }] },
     ]);
   });
   await ok('Imutabilidade e escrita direta bloqueadas', async () => {
@@ -321,8 +341,8 @@ try {
     const id = '60000000-0000-0000-0000-000000000001';
     await db.query('select rama_salvar($1,$2,null)', [id, draft]);
     const banho_itens = [
-      { quantidade: 40, produto: 'Silicone' },
-      { quantidade: 5.25, produto: 'Graxo' },
+      { quantidade: 40, produto: 'SILICONE' },
+      { quantidade: 5.25, produto: 'GRAXO' },
     ];
     await db.query('select rama_salvar($1,$2,1)', [
       id,
@@ -340,6 +360,44 @@ try {
     assert.deepEqual(h.dados_anteriores.banho_itens, draft.banho_itens);
     assert.deepEqual(h.dados_novos.banho_itens, banho_itens);
     assert.equal(Number(h.dados_novos.pressao_fourlad), 6.5);
+  });
+  await ok('SEM BANHO e NÃO APLICÁVEL independentes, caixa alta e histórico', async () => {
+    const id = '70000000-0000-0000-0000-000000000001';
+    const row = (
+      await db.query('select * from rama_salvar($1,$2,null)', [
+        id,
+        {
+          ...draft,
+          descricao: 'malha térmica',
+          observacao: 'ação\nsegunda linha',
+          banho_itens: [],
+          largura: null,
+          pressao_fourlad: null,
+        },
+      ])
+    ).rows[0];
+    assert.deepEqual(row.banho_itens, []);
+    assert.equal(row.largura, null);
+    assert.equal(row.pressao_fourlad, null);
+    assert.equal(row.descricao, 'MALHA TÉRMICA');
+    assert.equal(row.observacao, 'AÇÃO\nSEGUNDA LINHA');
+    const normal = (
+      await db.query('select * from rama_salvar($1,$2,1)', [
+        id,
+        { ...draft, banho_itens: [{ quantidade: 5, produto: 'óleo graxo' }], largura: null },
+      ])
+    ).rows[0];
+    assert.deepEqual(normal.banho_itens, [{ quantidade: 5, produto: 'ÓLEO GRAXO' }]);
+    assert.equal(normal.largura, null);
+    assert.equal(Number(normal.pressao_fourlad), 4.5);
+    const h = (
+      await db.query(
+        'select * from rama_receitas_historico where receita_id=$1 order by id desc limit 1',
+        [id],
+      )
+    ).rows[0];
+    assert.deepEqual(h.dados_anteriores.banho_itens, []);
+    assert.equal(h.dados_anteriores.pressao_fourlad, null);
   });
   console.log(
     `${tests} testes PostgreSQL aprovados. Auth/Storage reais não simulados como produção.`,

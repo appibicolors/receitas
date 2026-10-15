@@ -9,9 +9,9 @@ const good = {
   alimentacao: '12',
   pressao_fourlad: '4,5',
   banho_itens: [
-    { quantidade: '40', produto: 'Silicone' },
-    { quantidade: '5', produto: 'Graxo' },
-    { quantidade: '50', produto: 'Talco baby' },
+    { quantidade: '40', produto: 'SILICONE' },
+    { quantidade: '5', produto: 'GRAXO' },
+    { quantidade: '50', produto: 'TALCO BABY' },
   ],
   largura: '1,5',
 };
@@ -31,9 +31,9 @@ describe('Validação industrial', () => {
     expect(r.velocidade).toBe(12.5);
     expect(r.pressao_fourlad).toBe(4.5);
     expect(r.banho_itens).toEqual([
-      { quantidade: 40, produto: 'Silicone' },
-      { quantidade: 5, produto: 'Graxo' },
-      { quantidade: 50, produto: 'Talco baby' },
+      { quantidade: 40, produto: 'SILICONE' },
+      { quantidade: 5, produto: 'GRAXO' },
+      { quantidade: 50, produto: 'TALCO BABY' },
     ]);
     expect(r.observacao).toContain('\n');
   });
@@ -45,17 +45,17 @@ describe('Validação industrial', () => {
     expect(() => validate({ ...good, banho_itens: [] })).toThrow();
     expect(() => validate({ ...good, banho_itens: [{ quantidade: '1', produto: ' ' }] })).toThrow();
     expect(() =>
-      validate({ ...good, banho_itens: [{ quantidade: '-1', produto: 'Silicone' }] }),
+      validate({ ...good, banho_itens: [{ quantidade: '-1', produto: 'SILICONE' }] }),
     ).toThrow();
     expect(() =>
-      validate({ ...good, banho_itens: [{ quantidade: '', produto: 'Silicone' }] }),
+      validate({ ...good, banho_itens: [{ quantidade: '', produto: 'SILICONE' }] }),
     ).toThrow();
   });
   it('aceita doses decimais e normaliza nomes dos produtos', () =>
     expect(
-      validate({ ...good, banho_itens: [{ quantidade: '5,25', produto: '  Graxo  ' }] })
+      validate({ ...good, banho_itens: [{ quantidade: '5,25', produto: '  GRAXO  ' }] })
         .banho_itens,
-    ).toEqual([{ quantidade: 5.25, produto: 'Graxo' }]));
+    ).toEqual([{ quantidade: 5.25, produto: 'GRAXO' }]));
   it.each(['', '-1', 'NaN', 'Infinity'])('rejeita pressão Fourlad inválida %s', (value) =>
     expect(() => validate({ ...good, pressao_fourlad: value })).toThrow(),
   );
@@ -85,4 +85,58 @@ describe('Validação industrial', () => {
   it('foto opcional e descrição longa', () =>
     expect(validate({ ...good, descricao: 'ARTIGO '.repeat(200) }).foto).toBeNull());
   it('exibe horário de Brasília', () => expect(dateBR('2026-10-14T14:30:00Z')).toContain('11:30'));
+});
+
+describe('Condições opcionais', () => {
+  it('dispensa somente campos marcados e não envia flags de formulário', () => {
+    const r = validate({
+      ...good,
+      sem_banho: true,
+      largura_nao_aplicavel: true,
+      pressao_fourlad_nao_aplicavel: true,
+      largura: '',
+      pressao_fourlad: '',
+      banho_itens: [{ quantidade: '', produto: '' }],
+    });
+    expect(r.banho_itens).toEqual([]);
+    expect(r.largura).toBeNull();
+    expect(r.pressao_fourlad).toBeNull();
+    expect(r).not.toHaveProperty('sem_banho');
+  });
+  it('mantém validação dos demais campos', () => {
+    expect(() => validate({ ...good, sem_banho: true, largura: '' })).toThrow();
+    expect(() => validate({ ...good, largura_nao_aplicavel: true, pressao_fourlad: '' })).toThrow();
+  });
+  it('grava texto em caixa alta com acentos e quebras de linha', () => {
+    const r = validate({
+      ...good,
+      descricao: 'malha térmica',
+      observacao: 'atenção\nsegunda linha',
+      banho_itens: [{ quantidade: '2', produto: 'óleo' }],
+    });
+    expect(r.descricao).toBe('MALHA TÉRMICA');
+    expect(r.observacao).toBe('ATENÇÃO\nSEGUNDA LINHA');
+    expect(r.banho_itens[0].produto).toBe('ÓLEO');
+  });
+  it('reabre condições e conserva seus significados', () => {
+    const r = {
+      ...validate(good),
+      id: 'test',
+      codigo: 'IBI-REC-001',
+      data_atualizacao: '2026-10-15T12:00:00Z',
+      data_criacao: '2026-10-15T12:00:00Z',
+      versao: 1,
+      criado_por: 'test',
+      atualizado_por: 'test',
+      banho_itens: [],
+      largura: null,
+      pressao_fourlad: null,
+    } satisfies Recipe;
+    const d = toDraft(r);
+    expect(d.sem_banho).toBe(true);
+    expect(d.largura_nao_aplicavel).toBe(true);
+    expect(d.pressao_fourlad_nao_aplicavel).toBe(true);
+    expect(d.banho_itens).toHaveLength(1);
+    expect(validate(d)).toMatchObject({ banho_itens: [], largura: null, pressao_fourlad: null });
+  });
 });

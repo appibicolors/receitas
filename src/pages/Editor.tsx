@@ -5,6 +5,16 @@ import { supabase, fail } from '../lib/client';
 import { emptyDraft, toDraft, validate, type Draft, type Recipe, type Status } from '../lib/domain';
 import { uploadPhoto, discardPhoto } from '../lib/photos';
 import { Alert, Photo, Spinner } from '../components';
+function uppercase(input: HTMLInputElement | HTMLTextAreaElement, apply: (v: string) => void) {
+  const start = input.selectionStart,
+    end = input.selectionEnd;
+  const a = start === null ? null : input.value.slice(0, start).toUpperCase().length;
+  const b = end === null ? null : input.value.slice(0, end).toUpperCase().length;
+  apply(input.value.toUpperCase());
+  requestAnimationFrame(() => {
+    if (document.activeElement === input && a !== null && b !== null) input.setSelectionRange(a, b);
+  });
+}
 export default function Editor() {
   const { id } = useParams(),
     navigate = useNavigate();
@@ -101,7 +111,7 @@ export default function Editor() {
                 <input
                   required
                   value={draft.descricao}
-                  onChange={(e) => set('descricao', e.target.value)}
+                  onChange={(e) => uppercase(e.target, (v) => set('descricao', v))}
                   placeholder="Nome técnico, código do produto e nome popular"
                 />
               </label>
@@ -144,19 +154,54 @@ export default function Editor() {
                   ['largura', 'Largura', 'm'],
                 ] as const
               ).map(([key, label, unit]) => (
-                <label key={key}>
-                  {label}
-                  <div className="unit-input">
-                    <input
-                      type="text"
-                      required
-                      inputMode={key === 'temperatura' ? 'numeric' : 'decimal'}
-                      value={draft[key]}
-                      onChange={(e) => set(key, e.target.value)}
-                    />
-                    <span>{unit}</span>
-                  </div>
-                </label>
+                <div key={key}>
+                  <label>
+                    {label}
+                    <div className="unit-input">
+                      <input
+                        type="text"
+                        required={
+                          !(
+                            (key === 'largura' && draft.largura_nao_aplicavel) ||
+                            (key === 'pressao_fourlad' && draft.pressao_fourlad_nao_aplicavel)
+                          )
+                        }
+                        disabled={
+                          (key === 'largura' && draft.largura_nao_aplicavel) ||
+                          (key === 'pressao_fourlad' && draft.pressao_fourlad_nao_aplicavel)
+                        }
+                        inputMode={key === 'temperatura' ? 'numeric' : 'decimal'}
+                        value={draft[key]}
+                        onChange={(e) => set(key, e.target.value)}
+                      />
+                      <span>{unit}</span>
+                    </div>
+                  </label>
+                  {(key === 'largura' || key === 'pressao_fourlad') && (
+                    <label className="condition-choice">
+                      <input
+                        type="checkbox"
+                        aria-label={
+                          key === 'largura' ? 'Largura não aplicável' : 'Fourlad não aplicável'
+                        }
+                        checked={
+                          key === 'largura'
+                            ? draft.largura_nao_aplicavel
+                            : draft.pressao_fourlad_nao_aplicavel
+                        }
+                        onChange={(e) =>
+                          set(
+                            key === 'largura'
+                              ? 'largura_nao_aplicavel'
+                              : 'pressao_fourlad_nao_aplicavel',
+                            e.target.checked,
+                          )
+                        }
+                      />
+                      NÃO APLICÁVEL
+                    </label>
+                  )}
+                </div>
               ))}
               <label>
                 Alimentação
@@ -177,79 +222,91 @@ export default function Editor() {
           <section className="panel">
             <h2>Composição do banho</h2>
             <p className="bath-help">Informe a quantidade em g/L e o produto de cada item.</p>
-            <div className="bath-items">
-              {draft.banho_itens.map((item, index) => (
-                <fieldset className="bath-item" key={index}>
-                  <legend>Item {index + 1}</legend>
-                  <div className="bath-item-fields">
-                    <label>
-                      Quantidade
-                      <div className="unit-input">
+            <label className="condition-choice">
+              <input
+                type="checkbox"
+                checked={draft.sem_banho}
+                onChange={(e) => set('sem_banho', e.target.checked)}
+              />
+              SEM BANHO
+            </label>
+            <fieldset disabled={draft.sem_banho}>
+              <div className="bath-items">
+                {draft.banho_itens.map((item, index) => (
+                  <fieldset className="bath-item" key={index}>
+                    <legend>Item {index + 1}</legend>
+                    <div className="bath-item-fields">
+                      <label>
+                        Quantidade
+                        <div className="unit-input">
+                          <input
+                            aria-label={`Quantidade do item ${index + 1}`}
+                            type="text"
+                            inputMode="decimal"
+                            required
+                            value={item.quantidade}
+                            onChange={(e) =>
+                              set(
+                                'banho_itens',
+                                draft.banho_itens.map((entry, i) =>
+                                  i === index ? { ...entry, quantidade: e.target.value } : entry,
+                                ),
+                              )
+                            }
+                          />
+                          <span>g/L</span>
+                        </div>
+                      </label>
+                      <label>
+                        Produto
                         <input
-                          aria-label={`Quantidade do item ${index + 1}`}
-                          type="text"
-                          inputMode="decimal"
+                          aria-label={`Produto do item ${index + 1}`}
                           required
-                          value={item.quantidade}
+                          value={item.produto}
+                          placeholder="Ex.: Silicone"
                           onChange={(e) =>
                             set(
                               'banho_itens',
                               draft.banho_itens.map((entry, i) =>
-                                i === index ? { ...entry, quantidade: e.target.value } : entry,
+                                i === index
+                                  ? { ...entry, produto: e.target.value.toUpperCase() }
+                                  : entry,
                               ),
                             )
                           }
                         />
-                        <span>g/L</span>
-                      </div>
-                    </label>
-                    <label>
-                      Produto
-                      <input
-                        aria-label={`Produto do item ${index + 1}`}
-                        required
-                        value={item.produto}
-                        placeholder="Ex.: Silicone"
-                        onChange={(e) =>
+                      </label>
+                      <button
+                        type="button"
+                        className="danger"
+                        aria-label={`Apagar item ${index + 1} do banho`}
+                        onClick={() =>
                           set(
                             'banho_itens',
-                            draft.banho_itens.map((entry, i) =>
-                              i === index ? { ...entry, produto: e.target.value } : entry,
-                            ),
+                            draft.banho_itens.length === 1
+                              ? [{ quantidade: '', produto: '' }]
+                              : draft.banho_itens.filter((_, i) => i !== index),
                           )
                         }
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="danger"
-                      aria-label={`Apagar item ${index + 1} do banho`}
-                      onClick={() =>
-                        set(
-                          'banho_itens',
-                          draft.banho_itens.length === 1
-                            ? [{ quantidade: '', produto: '' }]
-                            : draft.banho_itens.filter((_, i) => i !== index),
-                        )
-                      }
-                    >
-                      <Trash2 size={18} />
-                      Apagar item
-                    </button>
-                  </div>
-                </fieldset>
-              ))}
-            </div>
-            <button
-              type="button"
-              className="add-bath-item"
-              onClick={() =>
-                set('banho_itens', [...draft.banho_itens, { quantidade: '', produto: '' }])
-              }
-            >
-              <Plus size={18} />
-              Adicionar item ao banho
-            </button>
+                      >
+                        <Trash2 size={18} />
+                        Apagar item
+                      </button>
+                    </div>
+                  </fieldset>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="add-bath-item"
+                onClick={() =>
+                  set('banho_itens', [...draft.banho_itens, { quantidade: '', produto: '' }])
+                }
+              >
+                <Plus size={18} />
+                Adicionar item ao banho
+              </button>
+            </fieldset>
           </section>
           <section className="panel">
             <h2>Informações adicionais</h2>
@@ -258,7 +315,7 @@ export default function Editor() {
               <textarea
                 rows={6}
                 value={draft.observacao}
-                onChange={(e) => set('observacao', e.target.value)}
+                onChange={(e) => uppercase(e.target, (v) => set('observacao', v))}
               />
             </label>
             <label className="status-field">

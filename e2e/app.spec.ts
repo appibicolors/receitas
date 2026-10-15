@@ -16,9 +16,9 @@ const recipe = {
   alimentacao: 12,
   pressao_fourlad: 4.5,
   banho_itens: [
-    { quantidade: 40, produto: 'Silicone' },
-    { quantidade: 5, produto: 'Graxo' },
-    { quantidade: 50, produto: 'Talco baby' },
+    { quantidade: 40, produto: 'SILICONE' },
+    { quantidade: 5, produto: 'GRAXO' },
+    { quantidade: 50, produto: 'TALCO BABY' },
   ],
   largura: 1.5,
   observacao: 'Linha 1\nLinha 2',
@@ -95,7 +95,7 @@ test('Pesquisa, detalhe sem foto e retorno preservado', async ({ page }) => {
   await page.getByRole('link').filter({ hasText: 'IBI-REC-001' }).click();
   await expect(page.getByText('Pressão Fourlad', { exact: true })).toBeVisible();
   await expect(page.getByText('12', { exact: true })).toBeVisible();
-  for (const product of ['Silicone', 'Graxo', 'Talco baby'])
+  for (const product of ['SILICONE', 'GRAXO', 'TALCO BABY'])
     await expect(page.getByText(product, { exact: true })).toBeVisible();
   await expect(page.getByText('Sem foto disponível')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Editar receita / status' })).toHaveCount(0);
@@ -117,7 +117,7 @@ for (const [name, width, height] of [
     ).toBe(true);
     await page.screenshot({ path: `test-results/consulta-${name}.png`, fullPage: true });
     await page.getByRole('link').filter({ hasText: 'IBI-REC-001' }).click();
-    await expect(page.getByText('Talco baby', { exact: true })).toBeVisible();
+    await expect(page.getByText('TALCO BABY', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -133,20 +133,20 @@ test('Supervisor: Fourlad, alimentação inteira e adicionar/editar/apagar itens
   await page.getByLabel('Velocidade').fill('12,5');
   await page.getByLabel(/Temperatura/).fill('180');
   await page.getByLabel(/Pressão Fourlad/).fill('4,5');
-  await page.getByLabel(/Largura/).fill('1,5');
+  await page.getByRole('textbox', { name: /^Largura/ }).fill('1,5');
   await page.getByLabel(/Alimentação/).fill('12');
   await expect(page.getByLabel(/Alimentação/)).toHaveAttribute('maxlength', '2');
   await page.getByLabel('Quantidade do item 1', { exact: true }).fill('40');
-  await page.getByLabel('Produto do item 1', { exact: true }).fill('Silicone');
+  await page.getByLabel('Produto do item 1', { exact: true }).fill('SILICONE');
   await page.getByRole('button', { name: 'Adicionar item ao banho' }).click();
   await page.getByLabel('Quantidade do item 2', { exact: true }).fill('5');
-  await page.getByLabel('Produto do item 2', { exact: true }).fill('Graxo');
+  await page.getByLabel('Produto do item 2', { exact: true }).fill('GRAXO');
   await page.getByRole('button', { name: 'Adicionar item ao banho' }).click();
   await page.getByLabel('Quantidade do item 3', { exact: true }).fill('50');
-  await page.getByLabel('Produto do item 3', { exact: true }).fill('Talco baby');
+  await page.getByLabel('Produto do item 3', { exact: true }).fill('TALCO BABY');
   await page.getByLabel('Quantidade do item 2', { exact: true }).fill('7,5');
   await page.getByRole('button', { name: 'Apagar item 2 do banho', exact: true }).click();
-  await expect(page.getByLabel('Produto do item 2', { exact: true })).toHaveValue('Talco baby');
+  await expect(page.getByLabel('Produto do item 2', { exact: true })).toHaveValue('TALCO BABY');
   await page.screenshot({ path: 'test-results/cadastro-supervisor.png', fullPage: true });
   const sent = page.waitForRequest((r) => r.url().includes('/rpc/rama_salvar'));
   await page.getByRole('button', { name: 'SALVAR RECEITA' }).click();
@@ -156,8 +156,8 @@ test('Supervisor: Fourlad, alimentação inteira e adicionar/editar/apagar itens
   expect(body.dados.alimentacao).toBe(12);
   expect(body.dados.pressao_fourlad).toBe(4.5);
   expect(body.dados.banho_itens).toEqual([
-    { quantidade: 40, produto: 'Silicone' },
-    { quantidade: 50, produto: 'Talco baby' },
+    { quantidade: 40, produto: 'SILICONE' },
+    { quantidade: 50, produto: 'TALCO BABY' },
   ]);
   await expect(page.getByRole('status')).toContainText('salva com sucesso');
 });
@@ -167,7 +167,7 @@ test('Edição carrega todos os itens e preserva versão ao remover um produto',
   await page.goto(`#/editar/${recipe.id}`);
   await expect(page.getByLabel(/Pressão Fourlad/)).toHaveValue('4,5');
   await expect(page.getByLabel(/Alimentação/)).toHaveValue('12');
-  await expect(page.getByLabel('Produto do item 3', { exact: true })).toHaveValue('Talco baby');
+  await expect(page.getByLabel('Produto do item 3', { exact: true })).toHaveValue('TALCO BABY');
   await page.getByRole('button', { name: 'Apagar item 1 do banho', exact: true }).click();
   await page.getByLabel('Quantidade do item 1', { exact: true }).fill('5,25');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -177,7 +177,59 @@ test('Edição carrega todos os itens e preserva versão ao remover um produto',
   const body = (await sent).postDataJSON();
   expect(body.versao_esperada).toBe(1);
   expect(body.dados.banho_itens).toEqual([
-    { quantidade: 5.25, produto: 'Graxo' },
-    { quantidade: 50, produto: 'Talco baby' },
+    { quantidade: 5.25, produto: 'GRAXO' },
+    { quantidade: 50, produto: 'TALCO BABY' },
   ]);
+});
+
+test('Condições independentes, alternância e caixa alta no cadastro', async ({ page }) => {
+  await mock(page, 'SUPERVISOR');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('#/nova');
+  await page.getByLabel('Descrição do artigo').fill('malha térmica');
+  await expect(page.getByLabel('Descrição do artigo')).toHaveValue('MALHA TÉRMICA');
+  await page.getByLabel('Velocidade').fill('10');
+  await page.getByLabel(/Temperatura/).fill('180');
+  await page.getByLabel(/Alimentação/).fill('0');
+  await page.getByRole('textbox', { name: /^Largura/ }).fill('1,5');
+  await page.getByRole('checkbox', { name: 'Largura não aplicável' }).check();
+  await page.getByRole('checkbox', { name: 'Fourlad não aplicável' }).check();
+  await page.getByRole('checkbox', { name: 'SEM BANHO' }).check();
+  await expect(page.getByLabel('Produto do item 1', { exact: true })).toBeDisabled();
+  await page.getByRole('checkbox', { name: 'Largura não aplicável' }).uncheck();
+  await expect(page.getByRole('textbox', { name: /^Largura/ })).toHaveValue('1,5');
+  await page.getByRole('checkbox', { name: 'Largura não aplicável' }).check();
+  await page.getByLabel('Observações e orientações técnicas').fill('ação necessária');
+  await expect(page.getByLabel('Observações e orientações técnicas')).toHaveValue(
+    'AÇÃO NECESSÁRIA',
+  );
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/condicoes-celular.png', fullPage: true });
+  const sent = page.waitForRequest((r) => r.url().includes('/rpc/rama_salvar'));
+  await page.getByRole('button', { name: 'SALVAR RECEITA' }).click();
+  expect((await sent).postDataJSON().dados).toMatchObject({
+    descricao: 'MALHA TÉRMICA',
+    observacao: 'AÇÃO NECESSÁRIA',
+    banho_itens: [],
+    largura: null,
+    pressao_fourlad: null,
+  });
+});
+test('Consulta e edição restauram SEM BANHO e NÃO APLICÁVEL', async ({ page }) => {
+  await mock(page, 'SUPERVISOR');
+  await page.route('**/rest/v1/rama_receitas?**', (route) =>
+    route.fulfill({ json: { ...recipe, banho_itens: [], largura: null, pressao_fourlad: null } }),
+  );
+  await page.goto('#/receita/' + recipe.id);
+  await expect(page.getByText('SEM BANHO', { exact: true })).toBeVisible();
+  await expect(page.getByText('NÃO APLICÁVEL', { exact: true })).toHaveCount(2);
+  await page.getByRole('link', { name: 'Editar receita / status' }).click();
+  for (const name of ['SEM BANHO', 'Largura não aplicável', 'Fourlad não aplicável'])
+    await expect(page.getByRole('checkbox', { name })).toBeChecked();
+  await page.getByRole('checkbox', { name: 'SEM BANHO' }).uncheck();
+  await expect(page.getByLabel('Produto do item 1', { exact: true })).toBeEnabled();
+  await expect(page.getByLabel('Produto do item 1', { exact: true })).toHaveAttribute(
+    'required',
+    '',
+  );
 });

@@ -5,7 +5,9 @@ import { supabase, fail } from '../lib/client';
 import { type Summary, type Recipe, type Status, dateBR, numberBR } from '../lib/domain';
 import { Alert, Photo, Badge, Spinner } from '../components';
 import { useAuth } from '../auth';
-function historyValue(value: unknown): string {
+function historyValue(value: unknown, key = ''): string {
+  if (value === null && ['largura', 'pressao_fourlad'].includes(key)) return 'NÃO APLICÁVEL';
+  if (key === 'banho_itens' && Array.isArray(value) && !value.length) return 'SEM BANHO';
   if (value === null || value === undefined) return '—';
   if (Array.isArray(value))
     return value
@@ -275,13 +277,21 @@ export function Detail() {
             {[
               ['Velocidade', numberBR(r.velocidade), 'm/min'],
               ['Temperatura', numberBR(r.temperatura), '°C'],
-              ['Pressão Fourlad', numberBR(r.pressao_fourlad), 'kgf/cm²'],
+              [
+                'Pressão Fourlad',
+                r.pressao_fourlad === null ? 'NÃO APLICÁVEL' : numberBR(r.pressao_fourlad),
+                r.pressao_fourlad === null ? '' : 'kgf/cm²',
+              ],
               ['Alimentação', String(r.alimentacao), ''],
-              ['Largura', numberBR(r.largura), 'm'],
+              [
+                'Largura',
+                r.largura === null ? 'NÃO APLICÁVEL' : numberBR(r.largura),
+                r.largura === null ? '' : 'm',
+              ],
             ].map(([label, value, unit]) => (
               <div key={label}>
                 <span>{label}</span>
-                <strong>
+                <strong className={value === 'NÃO APLICÁVEL' ? 'not-applicable' : undefined}>
                   {value} <small>{unit}</small>
                 </strong>
               </div>
@@ -291,6 +301,7 @@ export function Detail() {
       </div>
       <section className="panel bath-detail">
         <h2>Composição do banho</h2>
+        {!r.banho_itens.length && <p className="bath-condition">SEM BANHO</p>}
         <ul className="bath-list">
           {r.banho_itens.map((item, index) => (
             <li key={index}>
@@ -459,8 +470,8 @@ export function HistoryPage() {
                 .map(([k, v]) => (
                   <div key={k}>
                     <strong>{k}</strong>
-                    <span>Anterior: {historyValue(r.dados_anteriores?.[k])}</span>
-                    <span>Novo: {historyValue(v)}</span>
+                    <span>Anterior: {historyValue(r.dados_anteriores?.[k], k)}</span>
+                    <span>Novo: {historyValue(v, k)}</span>
                   </div>
                 ))}
             </div>
