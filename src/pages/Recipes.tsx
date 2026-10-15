@@ -5,6 +5,18 @@ import { supabase, fail } from '../lib/client';
 import { type Summary, type Recipe, type Status, dateBR, numberBR } from '../lib/domain';
 import { Alert, Photo, Badge, Spinner } from '../components';
 import { useAuth } from '../auth';
+function historyValue(value: unknown): string {
+  if (value === null || value === undefined) return '—';
+  if (Array.isArray(value))
+    return value
+      .map((item) =>
+        item && typeof item === 'object' && 'quantidade' in item && 'produto' in item
+          ? `${numberBR(Number(item.quantidade))} g/L ${item.produto}`
+          : JSON.stringify(item),
+      )
+      .join('\n');
+  return typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+}
 export function SearchPage({ manage = false }: { manage?: boolean }) {
   const [params, setParams] = useSearchParams();
   const q = params.get('q') ?? '',
@@ -220,7 +232,7 @@ export function Detail() {
     void supabase
       .from('rama_receitas')
       .select(
-        'id,codigo,descricao,foto,status,data_atualizacao,versao,velocidade,temperatura,alimentacao,banho,largura,observacao,data_criacao,criado_por,atualizado_por',
+        'id,codigo,descricao,foto,status,data_atualizacao,versao,velocidade,temperatura,alimentacao,pressao_fourlad,banho_itens,largura,observacao,data_criacao,criado_por,atualizado_por',
       )
       .eq('id', id!)
       .single()
@@ -263,11 +275,11 @@ export function Detail() {
             {[
               ['Velocidade', numberBR(r.velocidade), 'm/min'],
               ['Temperatura', numberBR(r.temperatura), '°C'],
-              ['Alimentação', r.alimentacao, ''],
-              ['Banho', numberBR(r.banho), 'g/L'],
+              ['Pressão Fourlad', numberBR(r.pressao_fourlad), 'kgf/cm²'],
+              ['Alimentação', String(r.alimentacao), ''],
               ['Largura', numberBR(r.largura), 'm'],
             ].map(([label, value, unit]) => (
-              <div key={label} className={label === 'Alimentação' ? 'feed-value' : ''}>
+              <div key={label}>
                 <span>{label}</span>
                 <strong>
                   {value} <small>{unit}</small>
@@ -277,6 +289,19 @@ export function Detail() {
           </div>
         </section>
       </div>
+      <section className="panel bath-detail">
+        <h2>Composição do banho</h2>
+        <ul className="bath-list">
+          {r.banho_itens.map((item, index) => (
+            <li key={index}>
+              <strong>
+                {numberBR(item.quantidade)} <small>g/L</small>
+              </strong>
+              <span>{item.produto}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
       <section className="panel observations">
         <h2>Orientações e observações</h2>
         <p>{r.observacao || 'Nenhuma observação informada.'}</p>
@@ -434,8 +459,8 @@ export function HistoryPage() {
                 .map(([k, v]) => (
                   <div key={k}>
                     <strong>{k}</strong>
-                    <span>Anterior: {String(r.dados_anteriores?.[k] ?? '—')}</span>
-                    <span>Novo: {String(v ?? '—')}</span>
+                    <span>Anterior: {historyValue(r.dados_anteriores?.[k])}</span>
+                    <span>Novo: {historyValue(v)}</span>
                   </div>
                 ))}
             </div>

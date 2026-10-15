@@ -1,5 +1,7 @@
 # Verificação e homologação
 
+Atualização de 15/10/2026: 43 testes de domínio/WebP, 26 de PostgreSQL, 12 de Edge e 9 de navegador (90 no total), com pressão Fourlad, banho por produtos e alimentação inteira. A seção abaixo registra a homologação inicial; os requisitos de máscara antigos foram substituídos conforme [alterações de receita](ALTERACOES_RECEITA.md).
+
 Data: 14/10/2026, horário de Brasília. Migrations RAMA, bucket e Edge Function implantados após inspeção/autorização. Foram comparados 56 objetos antigos sem diferenças e executados testes reais de rejeição anônima e CRUD transacional com rollback. O supervisor foi vinculado a conta Auth existente confirmada pelo usuário, sem alterar metadados Auth ou perfil do apontamento. Ver [estado da implantação](STATUS_IMPLANTACAO.md) para resultados recentes e limites da homologação.
 
 ## Escopo dos testes locais

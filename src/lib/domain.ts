@@ -18,21 +18,25 @@ export type Summary = {
 export type Recipe = Summary & {
   velocidade: number;
   temperatura: number;
-  alimentacao: string;
-  banho: number;
+  alimentacao: number;
+  pressao_fourlad: number;
+  banho_itens: BathItem[];
   largura: number;
   observacao: string;
   data_criacao: string;
   criado_por: string;
   atualizado_por: string;
 };
+export type BathItem = { quantidade: number; produto: string };
+export type DraftBathItem = { quantidade: string; produto: string };
 export type Draft = {
   descricao: string;
   foto: string | null;
   velocidade: string;
   temperatura: string;
   alimentacao: string;
-  banho: string;
+  pressao_fourlad: string;
+  banho_itens: DraftBathItem[];
   largura: string;
   observacao: string;
   status: Status;
@@ -43,21 +47,12 @@ export const emptyDraft: Draft = {
   velocidade: '',
   temperatura: '',
   alimentacao: '',
-  banho: '',
+  pressao_fourlad: '',
+  banho_itens: [{ quantidade: '', produto: '' }],
   largura: '',
   observacao: '',
   status: 'RASCUNHO',
 };
-export function maskFeed(value: string) {
-  return (
-    value
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, '')
-      .slice(0, 8)
-      .match(/.{1,2}/g)
-      ?.join('-') ?? ''
-  );
-}
 export function decimal(value: string) {
   if (!/^\d+(?:[.,]\d+)?$/.test(value.trim()))
     throw Error('Informe um número válido, usando vírgula ou ponto decimal.');
@@ -68,20 +63,33 @@ export function decimal(value: string) {
 export function validate(d: Draft) {
   if (!d.descricao.trim() || /[\r\n]/.test(d.descricao))
     throw Error('Informe a descrição em uma única linha.');
-  if (!/^[A-Z0-9]{2}(-[A-Z0-9]{2}){3}$/.test(d.alimentacao))
-    throw Error('Complete a alimentação: XX-XX-XX-XX.');
+  if (!/^[0-9]{1,2}$/.test(d.alimentacao))
+    throw Error('Alimentação deve ser um número inteiro de 0 a 99.');
   if (!/^\d+$/.test(d.temperatura) || Number(d.temperatura) > 2147483647)
     throw Error('Temperatura deve ser um número inteiro não negativo.');
   const velocidade = decimal(d.velocidade),
-    banho = decimal(d.banho),
+    pressao_fourlad = decimal(d.pressao_fourlad),
     largura = decimal(d.largura);
+  if (!d.banho_itens.length) throw Error('Inclua pelo menos um item no banho.');
+  const banho_itens = d.banho_itens.map((item, index) => {
+    const produto = item.produto.trim();
+    if (!produto || /[\r\n]/.test(produto))
+      throw Error(`Informe o produto do item ${index + 1} do banho.`);
+    try {
+      return { produto, quantidade: decimal(item.quantidade) };
+    } catch {
+      throw Error(`Informe uma quantidade válida em g/L para o item ${index + 1} do banho.`);
+    }
+  });
   if (largura <= 0) throw Error('Largura deve ser maior que zero.');
   if (!['ATIVA', 'INATIVA', 'RASCUNHO'].includes(d.status)) throw Error('Status inválido.');
   return {
     ...d,
     descricao: d.descricao.trim(),
     velocidade,
-    banho,
+    pressao_fourlad,
+    banho_itens,
+    alimentacao: Number(d.alimentacao),
     largura,
     temperatura: Number(d.temperatura),
   };
@@ -98,7 +106,12 @@ export function toDraft(r: Recipe): Draft {
   return {
     ...r,
     velocidade: String(r.velocidade).replace('.', ','),
-    banho: String(r.banho).replace('.', ','),
+    pressao_fourlad: String(r.pressao_fourlad).replace('.', ','),
+    banho_itens: r.banho_itens.map((item) => ({
+      produto: item.produto,
+      quantidade: String(item.quantidade).replace('.', ','),
+    })),
+    alimentacao: String(r.alimentacao),
     largura: String(r.largura).replace('.', ','),
     temperatura: String(r.temperatura),
   };

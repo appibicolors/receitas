@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Save, ArrowLeft, Upload } from 'lucide-react';
+import { Save, ArrowLeft, Upload, Plus, Trash2 } from 'lucide-react';
 import { supabase, fail } from '../lib/client';
-import {
-  emptyDraft,
-  maskFeed,
-  toDraft,
-  validate,
-  type Draft,
-  type Recipe,
-  type Status,
-} from '../lib/domain';
+import { emptyDraft, toDraft, validate, type Draft, type Recipe, type Status } from '../lib/domain';
 import { uploadPhoto, discardPhoto } from '../lib/photos';
 import { Alert, Photo, Spinner } from '../components';
 export default function Editor() {
@@ -148,7 +140,7 @@ export default function Editor() {
                 [
                   ['velocidade', 'Velocidade', 'm/min'],
                   ['temperatura', 'Temperatura', '°C'],
-                  ['banho', 'Banho', 'g/L'],
+                  ['pressao_fourlad', 'Pressão Fourlad', 'kgf/cm²'],
                   ['largura', 'Largura', 'm'],
                 ] as const
               ).map(([key, label, unit]) => (
@@ -170,48 +162,94 @@ export default function Editor() {
                 Alimentação
                 <input
                   required
-                  inputMode="text"
+                  inputMode="numeric"
                   autoComplete="off"
-                  pattern="[A-Z0-9]{2}(-[A-Z0-9]{2}){3}"
-                  placeholder="XX-XX-XX-XX"
+                  pattern="[0-9]{1,2}"
+                  maxLength={2}
+                  placeholder="0 a 99"
                   value={draft.alimentacao}
-                  onChange={(e) => {
-                    const input = e.target;
-                    const raw = input.value;
-                    const before = raw
-                      .slice(0, input.selectionStart ?? raw.length)
-                      .replace(/[^A-Za-z0-9]/g, '').length;
-                    const next = maskFeed(raw);
-                    set('alimentacao', next);
-                    requestAnimationFrame(() => {
-                      const pos = Math.min(
-                        next.length,
-                        before + Math.floor(Math.max(0, before - 1) / 2),
-                      );
-                      input.setSelectionRange(pos, pos);
-                    });
-                  }}
-                  onKeyDown={(e) => {
-                    const input = e.currentTarget;
-                    const p = input.selectionStart ?? 0;
-                    if (
-                      e.key === 'Backspace' &&
-                      input.selectionEnd === p &&
-                      p > 0 &&
-                      draft.alimentacao[p - 1] === '-'
-                    ) {
-                      e.preventDefault();
-                      const next = maskFeed(
-                        draft.alimentacao.slice(0, p - 2) + draft.alimentacao.slice(p),
-                      );
-                      set('alimentacao', next);
-                      requestAnimationFrame(() => input.setSelectionRange(p - 2, p - 2));
-                    }
-                  }}
+                  onChange={(e) => set('alimentacao', e.target.value)}
                 />
-                <small>4 grupos de 2 letras ou números.</small>
+                <small>Número inteiro com até 2 dígitos.</small>
               </label>
             </div>
+          </section>
+          <section className="panel">
+            <h2>Composição do banho</h2>
+            <p className="bath-help">Informe a quantidade em g/L e o produto de cada item.</p>
+            <div className="bath-items">
+              {draft.banho_itens.map((item, index) => (
+                <fieldset className="bath-item" key={index}>
+                  <legend>Item {index + 1}</legend>
+                  <div className="bath-item-fields">
+                    <label>
+                      Quantidade
+                      <div className="unit-input">
+                        <input
+                          aria-label={`Quantidade do item ${index + 1}`}
+                          type="text"
+                          inputMode="decimal"
+                          required
+                          value={item.quantidade}
+                          onChange={(e) =>
+                            set(
+                              'banho_itens',
+                              draft.banho_itens.map((entry, i) =>
+                                i === index ? { ...entry, quantidade: e.target.value } : entry,
+                              ),
+                            )
+                          }
+                        />
+                        <span>g/L</span>
+                      </div>
+                    </label>
+                    <label>
+                      Produto
+                      <input
+                        aria-label={`Produto do item ${index + 1}`}
+                        required
+                        value={item.produto}
+                        placeholder="Ex.: Silicone"
+                        onChange={(e) =>
+                          set(
+                            'banho_itens',
+                            draft.banho_itens.map((entry, i) =>
+                              i === index ? { ...entry, produto: e.target.value } : entry,
+                            ),
+                          )
+                        }
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="danger"
+                      aria-label={`Apagar item ${index + 1} do banho`}
+                      onClick={() =>
+                        set(
+                          'banho_itens',
+                          draft.banho_itens.length === 1
+                            ? [{ quantidade: '', produto: '' }]
+                            : draft.banho_itens.filter((_, i) => i !== index),
+                        )
+                      }
+                    >
+                      <Trash2 size={18} />
+                      Apagar item
+                    </button>
+                  </div>
+                </fieldset>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="add-bath-item"
+              onClick={() =>
+                set('banho_itens', [...draft.banho_itens, { quantidade: '', produto: '' }])
+              }
+            >
+              <Plus size={18} />
+              Adicionar item ao banho
+            </button>
           </section>
           <section className="panel">
             <h2>Informações adicionais</h2>

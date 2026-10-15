@@ -1,5 +1,7 @@
 # Estado da implantação
 
+Atualização de 15/10/2026: pressão Fourlad, banho por itens e alimentação inteira implementados e testados (90 testes locais). Migration `20261015131355_rama_fourlad_banho_itens_alimentacao` aplicada com limpeza de testes autorizada: 0 receitas/históricos/fotos; usuários RAMA preservados; os 56 objetos antigos do apontamento continuam sem diferenças. Sequência `last_value=1, is_called=false`, pronta para `IBI-REC-001`. Veja [alterações da receita](ALTERACOES_RECEITA.md). O registro abaixo descreve a implantação inicial de 14/10/2026.
+
 Atualizado em 14/10/2026. Implantação autorizada pelo usuário após revisão da entrega.
 
 | Etapa                                | Estado verificado                                                                                                                |

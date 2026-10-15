@@ -571,6 +571,81 @@ footer {
 .editor {
   max-width: 1000px;
 }
+.bath-help {
+  margin: -8px 0 22px;
+  font-size: 14px;
+}
+.bath-items {
+  display: grid;
+  gap: 18px;
+}
+.bath-item {
+  border: 1px solid #dfe7f2;
+  border-radius: 9px;
+  padding: 16px;
+}
+.bath-item legend {
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #32649e;
+}
+.bath-item-fields {
+  display: grid;
+  grid-template-columns: minmax(130px, 180px) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+}
+.add-bath-item {
+  margin-top: 20px;
+}
+.bath-detail {
+  margin-top: 24px;
+}
+.bath-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+}
+.bath-list li {
+  display: grid;
+  grid-template-columns: minmax(100px, 160px) minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #e1e9f3;
+}
+.bath-list li:last-child {
+  border: 0;
+  padding-bottom: 0;
+}
+.bath-list strong {
+  font-size: 26px;
+  color: #073579;
+}
+.bath-list strong small {
+  font-size: 14px;
+}
+.bath-list li > span {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .bath-item-fields {
+    grid-template-columns: 1fr;
+  }
+  .bath-item-fields > button {
+    justify-self: start;
+  }
+  .bath-list li {
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .parameters strong {
+    overflow-wrap: anywhere;
+  }
+}
 .table-wrap {
   overflow-x: auto;
 }

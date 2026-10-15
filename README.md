@@ -4,6 +4,8 @@ Aplicação React/TypeScript/Vite/Tailwind para consulta industrial e administra
 
 ## Estado da entrega
 
+Atualização de 15/10/2026: [pressão Fourlad, composição do banho e alimentação inteira](docs/ALTERACOES_RECEITA.md), incluindo a limpeza única de testes autorizada e reinício da numeração.
+
 Publicado em [Receitas da RAMA](https://appibicolors.github.io/receitas/). Migrations RAMA e Edge Function implantadas após inspeção/autorização; primeiro supervisor vinculado a conta Auth existente confirmada pelo usuário. Os 56 objetos preexistentes inspecionados mantiveram as mesmas definições/permissões, assim como os metadados Auth e o perfil do apontamento dessa conta. Workflow aprovado e acesso público/rota hash verificados. Consulte [estado da implantação](docs/STATUS_IMPLANTACAO.md) para os limites da homologação e pendências de convites, fotos e backup.
 
 ## Executar

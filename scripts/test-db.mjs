@@ -13,8 +13,13 @@ const draft = {
   foto: null,
   velocidade: 12.5,
   temperatura: 180,
-  alimentacao: 'A1-B2-03-04',
-  banho: 3.25,
+  alimentacao: 12,
+  pressao_fourlad: 4.5,
+  banho_itens: [
+    { quantidade: 40, produto: 'Silicone' },
+    { quantidade: 5, produto: 'Graxo' },
+    { quantidade: 50, produto: 'Talco baby' },
+  ],
   largura: 1.5,
   observacao: 'Linha 1\nLinha 2',
   status: 'ATIVA',
@@ -73,12 +78,46 @@ try {
     ],
   );
   await role(supervisor);
+  // Simula os dados antigos de teste antes da migration autorizada de limpeza.
+  await db.query('select rama_salvar($1,$2,null)', [
+    '90000000-0000-0000-0000-000000000001',
+    { ...draft, alimentacao: 'A1-B2-03-04', banho: 3.25 },
+  ]);
+  await db.exec('reset role');
+  await db.exec(
+    await readFile(
+      new URL(
+        '../supabase/migrations/20261015131355_rama_fourlad_banho_itens_alimentacao.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  );
+  await ok(
+    'Limpeza remove somente receitas/histórico e reinicia código, preservando usuários',
+    async () => {
+      assert.equal((await db.query('select count(*) as n from rama_receitas')).rows[0].n, 0);
+      assert.equal(
+        (await db.query('select count(*) as n from rama_receitas_historico')).rows[0].n,
+        0,
+      );
+      assert.equal((await db.query('select count(*) as n from rama_usuarios')).rows[0].n, 2);
+      const seq = (await db.query('select last_value,is_called from rama_receitas_codigo_seq'))
+        .rows[0];
+      assert.equal(seq.last_value, 1);
+      assert.equal(seq.is_called, false);
+    },
+  );
+  await role(supervisor);
   let saved;
   await ok('Supervisor cria, código automático, decimais, descrição e foto opcional', async () => {
     saved = (await db.query('select * from rama_salvar($1,$2,null)', [recipe, draft])).rows[0];
     assert.equal(saved.codigo, 'IBI-REC-001');
     assert.equal(Number(saved.largura), 1.5);
     assert.equal(saved.foto, null);
+    assert.equal(Number(saved.pressao_fourlad), 4.5);
+    assert.equal(saved.alimentacao, 12);
+    assert.deepEqual(saved.banho_itens, draft.banho_itens);
   });
   await ok('Temperatura decimal bloqueada no backend', () =>
     denied('select rama_salvar($1,$2,null)', [
@@ -86,7 +125,36 @@ try {
       { ...draft, temperatura: 180.5 },
     ]),
   );
-  await ok('Alimentação incompleta bloqueada', () =>
+  await ok('Pressão Fourlad rejeita ausência, negativos e infinito', async () => {
+    for (const pressao_fourlad of [null, -1, 'Infinity', 'NaN'])
+      await denied('select rama_salvar($1,$2,null)', [
+        '30000000-0000-0000-0000-000000000003',
+        { ...draft, pressao_fourlad },
+      ]);
+  });
+  await ok('Alimentação rejeita 3 dígitos, decimais, negativos e letras', async () => {
+    for (const alimentacao of [100, -1, 1.5, '01-02-03-04', 'AB', '001'])
+      await denied('select rama_salvar($1,$2,null)', [
+        '30000000-0000-0000-0000-000000000003',
+        { ...draft, alimentacao },
+      ]);
+  });
+  await ok('Banho exige lista com quantidade numérica e produto preenchido', async () => {
+    for (const banho_itens of [
+      null,
+      [],
+      {},
+      [null],
+      [{ quantidade: 1, produto: ' ' }],
+      [{ quantidade: '40', produto: 'Silicone' }],
+      [{ quantidade: -1, produto: 'Graxo' }],
+    ])
+      await denied('select rama_salvar($1,$2,null)', [
+        '30000000-0000-0000-0000-000000000003',
+        { ...draft, banho_itens },
+      ]);
+  });
+  await ok('Alimentação antiga bloqueada', () =>
     denied('select rama_salvar($1,$2,null)', [
       '10000000-0000-0000-0000-000000000002',
       { ...draft, alimentacao: 'A1-B2' },
@@ -99,7 +167,7 @@ try {
     ]);
     await denied('select rama_salvar($1,$2,null)', [
       '10000000-0000-0000-0000-000000000002',
-      { ...draft, banho: -1 },
+      { ...draft, banho_itens: [{ quantidade: -1, produto: 'Silicone' }] },
     ]);
   });
   await ok('Imutabilidade e escrita direta bloqueadas', async () => {
@@ -248,6 +316,31 @@ try {
       'preservado',
     ),
   );
+  await role(supervisor);
+  await ok('Itens de banho são editáveis/removíveis e auditados com pressão Fourlad', async () => {
+    const id = '60000000-0000-0000-0000-000000000001';
+    await db.query('select rama_salvar($1,$2,null)', [id, draft]);
+    const banho_itens = [
+      { quantidade: 40, produto: 'Silicone' },
+      { quantidade: 5.25, produto: 'Graxo' },
+    ];
+    await db.query('select rama_salvar($1,$2,1)', [
+      id,
+      { ...draft, pressao_fourlad: 6.5, banho_itens },
+    ]);
+    const row = (await db.query('select * from rama_receitas where id=$1', [id])).rows[0];
+    assert.deepEqual(row.banho_itens, banho_itens);
+    assert.equal(Number(row.pressao_fourlad), 6.5);
+    const h = (
+      await db.query(
+        'select * from rama_receitas_historico where receita_id=$1 order by id desc limit 1',
+        [id],
+      )
+    ).rows[0];
+    assert.deepEqual(h.dados_anteriores.banho_itens, draft.banho_itens);
+    assert.deepEqual(h.dados_novos.banho_itens, banho_itens);
+    assert.equal(Number(h.dados_novos.pressao_fourlad), 6.5);
+  });
   console.log(
     `${tests} testes PostgreSQL aprovados. Auth/Storage reais não simulados como produção.`,
   );
