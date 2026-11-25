@@ -52,6 +52,23 @@ tests/ e2e/                  validação de domínio e navegação
 .github/workflows/pages.yml  checks/build; publicação opt-in
 ```
 
+### Impressão de receitas
+
+A rota de supervisor `#/imprimir` gera documentos A4 sem alterar receitas ou
+histórico. A seleção permanece ativa durante paginação e filtros e pode usar as
+receitas marcadas, todo o resultado da pesquisa ou todas as receitas ativas.
+São suportadas 1, 2 ou 4 receitas por folha, fotos privadas opcionais,
+pré-visualização, download e impressão do mesmo arquivo PDF. Receitas extensas
+são expandidas para páginas de continuação, sem cortar parâmetros ou
+observações.
+
+O carregamento reutiliza a RPC `rama_pesquisar` e as políticas RLS existentes;
+fotos são baixadas do bucket privado somente com a sessão autenticada. Nenhuma
+chave administrativa é enviada ao navegador. A composição está em
+`src/lib/recipe-pdf.ts`, a coleta protegida em
+`src/lib/recipe-print-data.ts` e o planejamento de páginas em
+`src/lib/recipe-print-layout.ts`.
+
 ## Banco e segurança
 
 `rama_usuarios` vincula contas de `auth.users` sem modificar seus metadados. `rama_receitas` mantém parâmetros numéricos, códigos únicos, foto por caminho, status e auditoria. `rama_receitas_historico` preserva snapshots e autoria. A sequência `rama_receitas_codigo_seq` não reutiliza números; transações canceladas podem consumir códigos.

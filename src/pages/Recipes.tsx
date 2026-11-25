@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Search, Plus, Edit, History, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Search, Plus, Edit, History, Trash2, Printer } from 'lucide-react';
 import { supabase, fail } from '../lib/client';
 import { type Summary, type Recipe, type Status, dateBR, numberBR } from '../lib/domain';
 import { Alert, Photo, Badge, Spinner } from '../components';
@@ -106,10 +106,16 @@ export function SearchPage({ manage = false }: { manage?: boolean }) {
           </p>
         </div>
         {manage && (
-          <Link className="button primary" to="/nova">
-            <Plus size={18} />
-            Nova receita
-          </Link>
+          <div className="heading-actions">
+            <Link className="button" to={`/imprimir?${params.toString()}`}>
+              <Printer size={18} />
+              Imprimir / Gerar PDF
+            </Link>
+            <Link className="button primary" to="/nova">
+              <Plus size={18} />
+              Nova receita
+            </Link>
+          </div>
         )}
       </div>
       <section className="panel search-panel">

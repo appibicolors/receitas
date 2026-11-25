@@ -965,3 +965,4 @@ td small {
 .bath-condition {
   font-weight: 700;
 }
+.heading-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.heading-actions .button{display:flex;align-items:center;gap:7px}

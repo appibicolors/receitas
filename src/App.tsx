@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, NavLink, Route, Routes, Outlet, useNavigate } from 'react-router-dom';
-import { Search, Plus, LayoutDashboard, Users, LogOut, History, ClipboardList } from 'lucide-react';
+import { Search, Plus, LayoutDashboard, Users, LogOut, History, ClipboardList, Printer } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth';
 import { supabase, configured, fail } from './lib/client';
 import { Alert, Spinner } from './components';
 import { SearchPage, Detail, Dashboard, HistoryPage } from './pages/Recipes';
 import Editor from './pages/Editor';
 import UsersPage from './pages/Users';
+import PrintRecipes from './pages/PrintRecipes';
 import companyLogo from './assets/ibicolor-logo.png';
 function Brand() {
   return (
@@ -193,6 +194,10 @@ function Layout() {
             <ClipboardList size={18} />
             Gerenciar receitas
           </NavLink>
+          <NavLink to="/imprimir">
+            <Printer size={18} />
+            Imprimir receitas
+          </NavLink>
           <NavLink to="/usuarios">
             <Users size={18} />
             Usuários
@@ -236,6 +241,7 @@ export default function App() {
             <Route element={<Guard supervisor />}>
               <Route path="/painel" element={<Dashboard />} />
               <Route path="/gerenciar" element={<SearchPage manage />} />
+              <Route path="/imprimir" element={<PrintRecipes />} />
               <Route path="/nova" element={<Editor />} />
               <Route path="/editar/:id" element={<Editor />} />
               <Route path="/usuarios" element={<UsersPage />} />

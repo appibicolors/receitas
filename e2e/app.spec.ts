@@ -87,6 +87,29 @@ test('Operador bloqueado em URL administrativa e atualização de rota', async (
   await expect(page.getByRole('heading', { name: 'Receitas da RAMA', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Cadastrar receita' })).toHaveCount(0);
 });
+test('Operador não acessa impressão', async ({ page }) => {
+  await mock(page);
+  await page.goto('#/imprimir');
+  await expect(page).toHaveURL(/#\/consulta/);
+  await expect(page.getByRole('link', { name: 'Imprimir receitas' })).toHaveCount(0);
+});
+test('Supervisor seleciona receita e gera prévia em PDF', async ({ page }) => {
+  await mock(page, 'SUPERVISOR');
+  await page.route('**/rest/v1/rama_receitas?**', (route) => route.fulfill({ json: [recipe] }));
+  await page.goto('#/imprimir');
+  await expect(page.getByRole('heading', { name: 'Imprimir receitas' })).toBeVisible();
+  await page.getByRole('checkbox', { name: /IBI-REC-001/ }).check();
+  await expect(page.getByText('1 receita selecionada')).toBeVisible();
+  await page.getByRole('button', { name: 'Preparar pré-visualização' }).click();
+  await expect(page.getByText('PRÉ-VISUALIZAÇÃO FINAL')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Baixar PDF' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Imprimir', exact: true })).toBeVisible();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Baixar PDF' }).click();
+  const download = await downloadPromise;
+  await download.saveAs('test-results/receitas-preview.pdf');
+  await page.screenshot({ path: 'test-results/impressao-supervisor.png', fullPage: true });
+});
 test('Pesquisa, detalhe sem foto e retorno preservado', async ({ page }) => {
   await mock(page);
   await page.goto('#/consulta');
