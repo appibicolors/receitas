@@ -139,6 +139,19 @@ try {
   await ok('Nova migration preserva receitas existentes, histórico e sequência', async () =>
     assert.deepEqual(await snapshot(), beforeMigration),
   );
+  const beforeSuggestionsMigration = await snapshot();
+  await db.exec(
+    await readFile(
+      new URL(
+        '../supabase/migrations/20261125191224_rama_sugerir_produtos.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  );
+  await ok('Migration de sugestões preserva receitas, histórico e sequência', async () =>
+    assert.deepEqual(await snapshot(), beforeSuggestionsMigration),
+  );
   await role(supervisor);
   await ok('Temperatura decimal bloqueada no backend', () =>
     denied('select rama_salvar($1,$2,null)', [
@@ -399,6 +412,41 @@ try {
     assert.deepEqual(h.dados_anteriores.banho_itens, []);
     assert.equal(h.dados_anteriores.pressao_fourlad, null);
   });
+  await ok('Sugestões eliminam duplicidade e pesquisam trecho sem acento', async () => {
+    const id = '81000000-0000-0000-0000-000000000001';
+    await db.query('select rama_salvar($1,$2,null)', [
+      id,
+      {
+        ...draft,
+        banho_itens: [
+          { quantidade: 2, produto: 'SODA CÁUSTICA' },
+          { quantidade: 4, produto: 'SODA CAUSTICA' },
+        ],
+      },
+    ]);
+    const rows = (await db.query("select * from rama_sugerir_produtos('caustica',10)")).rows;
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].produto, 'SODA CAUSTICA');
+    assert.equal(Number(rows[0].frequencia), 2);
+  });
+  await ok('Produtos exclusivamente excluídos não aparecem nas sugestões', async () => {
+    const id = '81000000-0000-0000-0000-000000000002';
+    const row = (
+      await db.query('select * from rama_salvar($1,$2,null)', [
+        id,
+        { ...draft, banho_itens: [{ quantidade: 1, produto: 'PRODUTO EXCLUÍDO' }] },
+      ])
+    ).rows[0];
+    await db.query('select rama_excluir($1,$2)', [id, row.versao]);
+    assert.equal(
+      (await db.query("select * from rama_sugerir_produtos('excluido',10)")).rows.length,
+      0,
+    );
+  });
+  await role(operator);
+  await ok('Operador não acessa sugestões administrativas', () =>
+    denied("select * from rama_sugerir_produtos('',10)"),
+  );
   console.log(
     `${tests} testes PostgreSQL aprovados. Auth/Storage reais não simulados como produção.`,
   );

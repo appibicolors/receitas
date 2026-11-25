@@ -58,6 +58,12 @@ async function mock(page: Page, role = 'OPERADOR', authorized = true) {
             : []
           : path.includes('rama_pesquisar')
             ? [recipe]
+            : path.includes('rama_sugerir_produtos')
+              ? [
+                  { produto: 'SODA CÁUSTICA', frequencia: 8 },
+                  { produto: 'CORANTE AZUL MARINHO', frequencia: 4 },
+                  { produto: 'SILICONE', frequencia: 2 },
+                ]
             : path.includes('rama_receitas_historico')
               ? []
               : path.includes('rama_salvar')
@@ -183,6 +189,38 @@ test('Supervisor: Fourlad, alimentação inteira e adicionar/editar/apagar itens
     { quantidade: 50, produto: 'TALCO BABY' },
   ]);
   await expect(page.getByRole('status')).toContainText('salva com sucesso');
+});
+test('Supervisor autocompleta produtos sem alterar quantidades ou outras linhas', async ({ page }) => {
+  await mock(page, 'SUPERVISOR');
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await page.goto('#/nova');
+  const firstProduct = page.getByLabel('Produto do item 1', { exact: true });
+  await firstProduct.focus();
+  await expect(page.getByRole('option', { name: /SODA CÁUSTICA/ })).toBeVisible();
+  await page.screenshot({ path: 'test-results/autocomplete-produtos-tablet.png', fullPage: true });
+  await page.getByLabel('Quantidade do item 1', { exact: true }).fill('7,5');
+  await firstProduct.fill('caustica');
+  await page.waitForTimeout(300);
+  await firstProduct.press('ArrowDown');
+  await firstProduct.press('Enter');
+  await expect(firstProduct).toHaveValue('SODA CÁUSTICA');
+  await expect(page.getByLabel('Quantidade do item 1', { exact: true })).toHaveValue('7,5');
+
+  await page.getByRole('button', { name: 'Adicionar item ao banho' }).click();
+  const secondProduct = page.getByLabel('Produto do item 2', { exact: true });
+  await secondProduct.fill('produto novo');
+  await secondProduct.press('Escape');
+  await expect(secondProduct).toHaveValue('PRODUTO NOVO');
+  await expect(firstProduct).toHaveValue('SODA CÁUSTICA');
+  await secondProduct.focus();
+  await secondProduct.press('Tab');
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Adicionar item ao banho' }).click();
+  const thirdProduct = page.getByLabel('Produto do item 3', { exact: true });
+  await thirdProduct.focus();
+  await page.getByRole('option', { name: /CORANTE AZUL MARINHO/ }).click();
+  await expect(thirdProduct).toHaveValue('CORANTE AZUL MARINHO');
+  await expect(firstProduct).toHaveValue('SODA CÁUSTICA');
 });
 test('Edição carrega todos os itens e preserva versão ao remover um produto', async ({ page }) => {
   await mock(page, 'SUPERVISOR');

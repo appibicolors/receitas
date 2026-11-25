@@ -966,3 +966,4 @@ td small {
   font-weight: 700;
 }
 .heading-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.heading-actions .button{display:flex;align-items:center;gap:7px}
+.product-autocomplete{position:relative;min-width:0}.product-suggestions{position:absolute;z-index:30;top:100%;left:0;right:0;margin:4px 0 0;padding:4px;max-height:280px;overflow-y:auto;list-style:none;background:#fff;border:1px solid #c8d5e6;border-radius:10px;box-shadow:0 14px 32px rgba(15,40,76,.16)}.product-suggestions li{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:9px 11px;border-radius:7px;color:#102746;cursor:pointer}.product-suggestions li[role=option]:hover,.product-suggestions li.active{background:#eaf2ff;color:#0645a5}.product-suggestions small{flex:none;color:#64748b;font-size:.72rem}.product-suggestion-status{cursor:default!important;color:#64748b!important}

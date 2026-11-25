@@ -5,6 +5,7 @@ import { supabase, fail } from '../lib/client';
 import { emptyDraft, toDraft, validate, type Draft, type Recipe, type Status } from '../lib/domain';
 import { uploadPhoto, discardPhoto } from '../lib/photos';
 import { Alert, Photo, Spinner } from '../components';
+import ProductAutocomplete from '../components/ProductAutocomplete';
 function uppercase(input: HTMLInputElement | HTMLTextAreaElement, apply: (v: string) => void) {
   const start = input.selectionStart,
     end = input.selectionEnd;
@@ -257,25 +258,22 @@ export default function Editor() {
                           <span>g/L</span>
                         </div>
                       </label>
-                      <label>
-                        Produto
-                        <input
-                          aria-label={`Produto do item ${index + 1}`}
-                          required
-                          value={item.produto}
-                          placeholder="Ex.: Silicone"
-                          onChange={(e) =>
-                            set(
-                              'banho_itens',
-                              draft.banho_itens.map((entry, i) =>
-                                i === index
-                                  ? { ...entry, produto: e.target.value.toUpperCase() }
-                                  : entry,
-                              ),
-                            )
-                          }
-                        />
-                      </label>
+                      <ProductAutocomplete
+                        label="Produto"
+                        ariaLabel={`Produto do item ${index + 1}`}
+                        id={`produto-banho-${index}`}
+                        value={item.produto}
+                        required
+                        placeholder="Ex.: Silicone"
+                        onChange={(produto) =>
+                          set(
+                            'banho_itens',
+                            draft.banho_itens.map((entry, i) =>
+                              i === index ? { ...entry, produto } : entry,
+                            ),
+                          )
+                        }
+                      />
                       <button
                         type="button"
                         className="danger"
